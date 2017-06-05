@@ -1,4 +1,4 @@
-function my_deferred_acceptance
+function my_deferred_acceptance(m_prefs, f_prefs)
     m_size = size(m_prefs, 2)
     f_size = size(f_prefs, 2)
     m_matched = zeros(Int64, m_size)
