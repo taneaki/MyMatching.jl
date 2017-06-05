@@ -1,4 +1,5 @@
-function my_deferred_acceptance(m_prefs, f_prefs)
+function my_deferred_acceptance(m_prefs::Matrix{Int},
+                             f_prefs::Matrix{Int})
     m_size = size(m_prefs, 2)
     f_size = size(f_prefs, 2)
     m_matched = zeros(Int64, m_size)
