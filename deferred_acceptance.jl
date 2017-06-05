@@ -1,4 +1,5 @@
-function deferred_acceptance(m_prefs, f_prefs)
+function deferred_acceptance(m_prefs::Matrix{Int},
+                             f_prefs::Matrix{Int})
     m_size = size(m_prefs, 2)
     f_size = size(f_prefs, 2)
     m_matched = zeros(Int64, m_size)
@@ -32,4 +33,29 @@ function deferred_acceptance(m_prefs, f_prefs)
         end
     end
     return m_matched, f_matched
+end
+
+function deferred_acceptance(m_prefs::Vector{Vector{Int}},
+                             f_prefs::Vector{Vector{Int}})
+    m_prefs_2d = Array{Int64}(length(f_prefs)+1, length(m_prefs))
+    for i in 1:length(m_prefs)
+        if length(m_prefs[i]) != length(f_prefs)
+            x = vcat(m_prefs[i], 0)
+            x = vcat(x, setdiff([i for i in 1:length(f_prefs)], m_prefs[i]))
+            m_prefs_2d[:,i] = x
+        else
+            m_prefs_2d[:,i] = vcat(m_prefs[i], 0)
+        end
+    end
+    f_prefs_2d = Array{Int64}(length(m_prefs)+1, length(f_prefs))
+    for i in 1:length(f_prefs)
+        if length(f_prefs[i]) != length(m_prefs)
+            x = vcat(f_prefs[i], 0)
+            x = vcat(x, setdiff([i for i in 1:length(m_prefs)], f_prefs[i]))
+            f_prefs_2d[:,i] = x
+        else
+            f_prefs_2d[:,i] = vcat(f_prefs[i], 0)
+        end
+    end        
+    return deferred_acceptance(m_prefs_2d, f_prefs_2d)
 end
