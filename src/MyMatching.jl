@@ -1,3 +1,3 @@
 module MyMatching
-include("deffered_acceptance.jl")
+include("deferred_acceptance.jl")
 end
