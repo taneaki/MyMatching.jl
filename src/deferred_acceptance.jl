@@ -1,60 +1,108 @@
-function my_deferred_acceptance(m_prefs, f_prefs)
-    m_size = size(m_prefs, 2)
-    f_size = size(f_prefs, 2)
-    m_matched = zeros(Int64, m_size)
-    f_matched = zeros(Int64, f_size)
-    next_prop = zeros(Int64, m_size)
+#‘½‘Î‘½Vector{Int}
+function my_deferred_acceptance(prop_prefs, resp_prefs, caps)
+    prop_size = size(prop_prefs, 2)
+    resp_size = size(resp_prefs, 2)
+    prop_matched = zeros(Int64, prop_size)
+    resp_matched = zeros(Int64, sum(caps))
+    next_prop = zeros(Int64, prop_size)
     max_prop = Int64[]
     
-    for m in 1:m_size
-        push!(max_prop, find(m_prefs[:, m] .== 0)[1]-1)
+    for p in 1:prop_size
+        push!(max_prop, find(prop_prefs[:, p] .== 0)[1]-1)
     end
     
-    while any(m_matched .== 0) == true
-        m_single = find(m_matched .== 0)
-        if all(next_prop[m_single] .>= max_prop[m_single]) == true
+    indptr = Array{Int}(resp_size+1)
+    indptr[1] = 1
+    for i in 1:resp_size
+        indptr[i+1] = indptr[i] + caps[i]
+    end
+    
+    while any(prop_matched .== 0) == true
+        prop_single = find(prop_matched .== 0)
+        if all(next_prop[prop_single] .>= max_prop[prop_single]) == true
             break
         else
-            for each_m_single in m_single
-                proposing = m_prefs[next_prop[each_m_single]+1, each_m_single]
+            for each_prop_single in prop_single
+                proposing = prop_prefs[next_prop[each_prop_single]+1, each_prop_single]
                 if proposing != 0
-                    next_prop[each_m_single] = next_prop[each_m_single]+1
-                    if f_matched[proposing] == 0 && (find(f_prefs[:, proposing] .==each_m_single) .<  find(f_prefs[:, proposing] .==0)) == [true]
-                        m_matched[each_m_single] = proposing
-                        f_matched[proposing] = each_m_single
-                    elseif f_matched[proposing] != 0 && (find(f_prefs[:, proposing] .==each_m_single) .<  find(f_prefs[:, proposing] .==f_matched[proposing])) == [true]
-                        m_matched[each_m_single] = proposing
-                        m_matched[f_matched[proposing]] = 0
-                        f_matched[proposing] = each_m_single
+                    next_prop[each_prop_single] = next_prop[each_prop_single]+1
+                    if sum(resp_matched[indptr[proposing]:indptr[proposing+1]-1] .== 0) != 0 && (find(resp_prefs[:, proposing] .==each_prop_single) .<  find(resp_prefs[:, proposing] .==0)) == [true]
+                        prop_matched[each_prop_single] = proposing
+                        matched_index = findfirst(resp_matched[indptr[proposing]:indptr[proposing+1]-1] .== 0)
+                        resp_matched[matched_index + indptr[proposing] - 1] = each_prop_single
+                    elseif sum(resp_matched[indptr[proposing]:indptr[proposing+1]-1] .== 0) .== 0
+                        current_order = Int64[]
+                        for i in 1:caps[proposing] push!(current_order, find(resp_prefs[:, proposing] .== resp_matched[indptr[proposing]:indptr[proposing+1]-1])[1]) end
+                        if findmax(current_order)[1] .> find(resp_prefs[:, proposing] .==each_prop_single)
+                        prop_matched[each_prop_single] = proposing
+                        prop_matched[resp_matched[findmax(current_order)[2] + indptr[proposing] - 1]] = 0
+                        resp_matched[findmax(current_order)[2] + indptr[proposing] - 1] = each_prop_single
+                        end
                     end
                 end
             end
         end
     end
-    return m_matched, f_matched
+       
+    return prop_matched, resp_matched, indptr
 end
 
-function my_deferred_acceptance(m_prefs::Vector{Vector{Int}},
-                             f_prefs::Vector{Vector{Int}})
-    m_prefs_2d = Array{Int64}(length(f_prefs)+1, length(m_prefs))
-    for i in 1:length(m_prefs)
-        if length(m_prefs[i]) != length(f_prefs)
-            x = vcat(m_prefs[i], 0)
-            x = vcat(x, setdiff([i for i in 1:length(f_prefs)], m_prefs[i]))
-            m_prefs_2d[:,i] = x
+#‘½‘Î‘½Vector{Vector{Int}}
+function my_deferred_acceptance(prop_prefs::Vector{Vector{Int}}, resp_prefs::Vector{Vector{Int}}, caps)
+    prop_prefs_2d = Array{Int64}(length(resp_prefs)+1, length(prop_prefs))    
+    for i in 1:length(prop_prefs)
+        if length(prop_prefs[i]) != length(resp_prefs)
+            x = vcat(prop_prefs[i], 0)
+            x = vcat(x, setdiff([i for i in 1:length(resp_prefs)], prop_prefs[i]))
+            prop_prefs_2d[:,i] = x
         else
-            m_prefs_2d[:,i] = vcat(m_prefs[i], 0)
+            prop_prefs_2d[:,i] = vcat(prop_prefs[i], 0)
         end
     end
-    f_prefs_2d = Array{Int64}(length(m_prefs)+1, length(f_prefs))
-    for i in 1:length(f_prefs)
-        if length(f_prefs[i]) != length(m_prefs)
-            x = vcat(f_prefs[i], 0)
-            x = vcat(x, setdiff([i for i in 1:length(m_prefs)], f_prefs[i]))
-            f_prefs_2d[:,i] = x
+    resp_prefs_2d = Array{Int64}(length(prop_prefs)+1, length(resp_prefs))
+    for i in 1:length(resp_prefs)
+        if length(resp_prefs[i]) != length(prop_prefs)
+            x = vcat(resp_prefs[i], 0)
+            x = vcat(x, setdiff([i for i in 1:length(prop_prefs)], resp_prefs[i]))
+            resp_prefs_2d[:,i] = x
         else
-            f_prefs_2d[:,i] = vcat(f_prefs[i], 0)
+            resp_prefs_2d[:,i] = vcat(resp_prefs[i], 0)
         end
-    end        
-    return my_deferred_acceptance(m_prefs_2d, f_prefs_2d)
+    end
+    return my_deferred_acceptance(prop_prefs_2d, resp_prefs_2d, caps)
+end
+
+#ˆê‘Î‘½Vector{Int}
+function my_deferred_acceptance(prop_prefs,resp_prefs)
+    caps = ones(Int, size(resp_prefs, 2))
+    prop_matches, resp_matches, indptr = my_deferred_acceptance(prop_prefs, resp_prefs, caps)
+    return prop_matches, resp_matches
+end
+
+#ˆê‘Î‘½Vector{Vector{Int}}
+function my_deferred_acceptance(prop_prefs::Vector{Vector{Int}},
+                                resp_prefs::Vector{Vector{Int}})
+    prop_prefs_2d = Array{Int64}(length(resp_prefs)+1, length(prop_prefs))    
+    for i in 1:length(prop_prefs)
+        if length(prop_prefs[i]) != length(resp_prefs)
+            x = vcat(prop_prefs[i], 0)
+            x = vcat(x, setdiff([i for i in 1:length(resp_prefs)], prop_prefs[i]))
+            prop_prefs_2d[:,i] = x
+        else
+            prop_prefs_2d[:,i] = vcat(prop_prefs[i], 0)
+        end
+    end
+    resp_prefs_2d = Array{Int64}(length(prop_prefs)+1, length(resp_prefs))
+    for i in 1:length(resp_prefs)
+        if length(resp_prefs[i]) != length(prop_prefs)
+            x = vcat(resp_prefs[i], 0)
+            x = vcat(x, setdiff([i for i in 1:length(prop_prefs)], resp_prefs[i]))
+            resp_prefs_2d[:,i] = x
+        else
+            resp_prefs_2d[:,i] = vcat(resp_prefs[i], 0)
+        end
+    end
+    caps = ones(Int, length(resp_prefs))
+    prop_matches, resp_matches, indptr = my_deferred_acceptance(prop_prefs_2d, resp_prefs_2d, caps)
+    return prop_matches, resp_matches
 end
