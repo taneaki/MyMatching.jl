@@ -85,8 +85,7 @@ end
 #onetoone_Vector{Vector{Int}}
 function my_deferred_acceptance(prop_prefs::Vector{Vector{Int}},
                                 resp_prefs::Vector{Vector{Int}})
-   caps = ones(Int, size(resp_prefs, 2))
-   prop_prefs_2d = Array{Int64}(length(resp_prefs)+1, length(prop_prefs))    
+    prop_prefs_2d = Array{Int64}(length(resp_prefs)+1, length(prop_prefs))    
     for i in 1:length(prop_prefs)
         if length(prop_prefs[i]) != length(resp_prefs)
             x = vcat(prop_prefs[i], 0)
@@ -106,7 +105,8 @@ function my_deferred_acceptance(prop_prefs::Vector{Vector{Int}},
             resp_prefs_2d[:,i] = vcat(resp_prefs[i], 0)
         end
     end
+    caps = ones(Int, size(resp_prefs_2d, 2))
     prop_matches, resp_matches, indptr =
-        my_deferred_acceptance(prop_prefs, resp_prefs, caps)
+        my_deferred_acceptance(prop_prefs_2d, resp_prefs_2d, caps)
     return prop_matches, resp_matches
 end  
