@@ -1,6 +1,6 @@
-#manytoone_Vector{Int}
-function my_deferred_acceptance(prop_prefs::Vector{Int},
-                                resp_prefs::Vector{Int},
+#manytoone_Array{Int}
+function my_deferred_acceptance(prop_prefs::Array{Int},
+                                resp_prefs::Array{Int},
                                 caps::Vector{Int})
     prop_size = size(prop_prefs, 2) #propå‘Ì”
     resp_size = size(resp_prefs, 2) #prefå‘Ì”
@@ -74,9 +74,9 @@ function my_deferred_acceptance(prop_prefs::Vector{Vector{Int}},
     end
     return deferred_acceptance(m_prefs_2d, f_prefs_2d, caps)        
 end
-#onetooneVector{Int}
-function my_deferred_acceptance(prop_prefs::Vector{Int},
-                                resp_prefs::Vector{Int})
+#onetoone_Array{Int}
+function my_deferred_acceptance(prop_prefs::Array{Int},
+                                resp_prefs::Array{Int})
     caps = ones(Int, size(resp_prefs, 2))
     prop_matches, resp_matches, indptr =
         my_deferred_acceptance(prop_prefs, resp_prefs, caps)
