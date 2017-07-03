@@ -6,7 +6,7 @@ function my_deferred_acceptance(prop_prefs::Array{Int},
     resp_size = size(resp_prefs, 2) #pref主体数
     prop_matched = zeros(Int64, prop_size) #propマッチ相手配列の初期化
     resp_matched = zeros(Int64, sum(caps)) #resfマッチ相手配列の初期化
-    next_prop = zeros(Int64, prop_size) #propが次にプロポーズをする時の回数
+    next_prop = zeros(Int, prop_size) #propが次にプロポーズをする時の回数
     max_prop = Int64[] #最大プロポーズ回数配列の初期化
     
     for p in 1:prop_size
