@@ -72,7 +72,7 @@ function my_deferred_acceptance(prop_prefs::Vector{Vector{Int}},
             resp_prefs_2d[:,i] = vcat(resp_prefs[i], 0)
         end
     end
-    return deferred_acceptance(m_prefs_2d, f_prefs_2d, caps)        
+    return my_deferred_acceptance(m_prefs_2d, f_prefs_2d, caps)        
 end
 #onetoone_Array{Int}
 function my_deferred_acceptance(prop_prefs::Array{Int},
