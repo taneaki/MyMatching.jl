@@ -1,5 +1,7 @@
-#多対多Vector{Int}
-function my_deferred_acceptance(prop_prefs, resp_prefs, caps)
+#manytoone_Vector{Int}
+function my_deferred_acceptance(prop_prefs::Vector{Int},
+                                resp_prefs::Vector{Int},
+                                caps::Vector{Int})
     prop_size = size(prop_prefs, 2) #prop主体数
     resp_size = size(resp_prefs, 2) #pref主体数
     prop_matched = zeros(Int64, prop_size) #propマッチ相手配列の初期化
@@ -46,9 +48,10 @@ function my_deferred_acceptance(prop_prefs, resp_prefs, caps)
        
     return prop_matched, resp_matched, indptr
 end
-
-#多対多Vector{Vector{Int}}
-function my_deferred_acceptance(prop_prefs::Vector{Vector{Int}}, resp_prefs::Vector{Vector{Int}}, caps)
+#manytoone_Vector{Vector{Int}}
+function my_deferred_acceptance(prop_prefs::Vector{Vector{Int}},
+                                resp_prefs::Vector{Vector{Int}},
+                                caps::Vector{Int})
     prop_prefs_2d = Array{Int64}(length(resp_prefs)+1, length(prop_prefs))    
     for i in 1:length(prop_prefs)
         if length(prop_prefs[i]) != length(resp_prefs)
@@ -69,20 +72,21 @@ function my_deferred_acceptance(prop_prefs::Vector{Vector{Int}}, resp_prefs::Vec
             resp_prefs_2d[:,i] = vcat(resp_prefs[i], 0)
         end
     end
-    return my_deferred_acceptance(prop_prefs_2d, resp_prefs_2d, caps)
+    return deferred_acceptance(m_prefs_2d, f_prefs_2d, caps)        
 end
-
-#一対多Vector{Int}
-function my_deferred_acceptance(prop_prefs,resp_prefs)
+#onetooneVector{Int}
+function my_deferred_acceptance(prop_prefs::Vector{Int},
+                                resp_prefs::Vector{Int})
     caps = ones(Int, size(resp_prefs, 2))
-    prop_matches, resp_matches, indptr = my_deferred_acceptance(prop_prefs, resp_prefs, caps)
+    prop_matches, resp_matches, indptr =
+        my_deferred_acceptance(prop_prefs, resp_prefs, caps)
     return prop_matches, resp_matches
 end
-
-#一対多Vector{Vector{Int}}
+#onetoone_Vector{Vector{Int}}
 function my_deferred_acceptance(prop_prefs::Vector{Vector{Int}},
                                 resp_prefs::Vector{Vector{Int}})
-    prop_prefs_2d = Array{Int64}(length(resp_prefs)+1, length(prop_prefs))    
+   caps = ones(Int, size(resp_prefs, 2))
+   prop_prefs_2d = Array{Int64}(length(resp_prefs)+1, length(prop_prefs))    
     for i in 1:length(prop_prefs)
         if length(prop_prefs[i]) != length(resp_prefs)
             x = vcat(prop_prefs[i], 0)
@@ -102,7 +106,7 @@ function my_deferred_acceptance(prop_prefs::Vector{Vector{Int}},
             resp_prefs_2d[:,i] = vcat(resp_prefs[i], 0)
         end
     end
-    caps = ones(Int, length(resp_prefs))
-    prop_matches, resp_matches, indptr = my_deferred_acceptance(prop_prefs_2d, resp_prefs_2d, caps)
+    prop_matches, resp_matches, indptr =
+        my_deferred_acceptance(prop_prefs, resp_prefs, caps)
     return prop_matches, resp_matches
-end
+end  
